@@ -1,0 +1,36 @@
+name: Notifier
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    - cron: '*/30 * * * *'  # Runs the workflow every 30 minutes
+
+jobs:
+  notifyTelegram:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.0'  # Set the PHP version you need
+
+    - name: Install dependencies
+      run: composer install
+
+    - name: Run PHP script
+      run: php main.php
+
+    - name: Send notification to Telegram
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_TO }}
+        token: ${{ secrets.TELEGRAM_TOKEN }}
+        message: |
+          The PHP bot script has been executed following a ${{ github.event_name }} event.
